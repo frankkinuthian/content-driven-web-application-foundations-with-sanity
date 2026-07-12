@@ -1,9 +1,10 @@
-import Link from 'next/link'
-import { sanityFetch } from '@/sanity/lib/live'
-import { POSTS_QUERY } from '@/sanity/lib/queries'
+import Link from "next/link";
+import { POSTS_QUERY } from "@/sanity/lib/queries";
+import { sanityFetch } from "@/sanity/lib/client";
 
 export default async function Page() {
-  const { data: posts } = await sanityFetch({ query: POSTS_QUERY })
+  /** Fetch posts from Sanity */
+  const posts = await sanityFetch({ query: POSTS_QUERY });
 
   return (
     <main className="container mx-auto grid grid-cols-1 gap-6 p-12">
@@ -23,5 +24,5 @@ export default async function Page() {
       <hr />
       <Link href="/">&larr; Return home</Link>
     </main>
-  )
+  );
 }
