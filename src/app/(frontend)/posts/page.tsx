@@ -7,6 +7,7 @@ export default async function Page() {
   const posts = await sanityFetch({
     query: POSTS_QUERY,
     revalidate: 3600,
+    tags: ["post", "author", "category"],
   });
 
   return (
