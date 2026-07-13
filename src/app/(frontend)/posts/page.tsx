@@ -4,7 +4,10 @@ import { sanityFetch } from "@/sanity/lib/client";
 
 export default async function Page() {
   /** Fetch posts from Sanity */
-  const posts = await sanityFetch({ query: POSTS_QUERY });
+  const posts = await sanityFetch({
+    query: POSTS_QUERY,
+    revalidate: 3600,
+  });
 
   return (
     <main className="container mx-auto grid grid-cols-1 gap-6 p-12">
