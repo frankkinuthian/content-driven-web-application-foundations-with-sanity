@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { fetchRedirects } from "@/sanity/lib/fetchRedirects";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -10,6 +11,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  async redirects() {
+    return await fetchRedirects();
+  },
+  
   logging: {
     fetches: {
       fullUrl: true,
