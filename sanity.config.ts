@@ -13,11 +13,15 @@ import { apiVersion, dataset, projectId } from "./src/sanity/env";
 import { schema } from "./src/sanity/schemaTypes";
 import { structure } from "./src/sanity/structure";
 import { presentationTool } from "sanity/presentation";
-import { resolve } from '@/sanity/presentation/resolve'
+import { resolve } from "@/sanity/presentation/resolve";
 
 export default defineConfig({
   basePath: "/studio",
   projectId,
+  document: {
+    newDocumentOptions: (prev) =>
+      prev.filter((item) => item.templateId !== "siteSettings"),
+  },
   dataset,
   // Add and edit the content schema in the './sanity/schemaTypes' folder
   schema,

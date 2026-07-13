@@ -35,6 +35,22 @@ export type SplitImage = {
   };
 };
 
+export type PageReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "page";
+};
+
+export type SiteSettings = {
+  _id: string;
+  _type: "siteSettings";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  homePage?: PageReference;
+};
+
 export type Hero = {
   _type: "hero";
   title?: string;
@@ -369,6 +385,8 @@ export type Geopoint = {
 export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | SplitImage
+  | PageReference
+  | SiteSettings
   | Hero
   | Features
   | FaqReference
@@ -552,6 +570,86 @@ export type PAGE_QUERY_RESULT = {
   };
 } | null;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: HOME_PAGE_QUERY
+// Query: *[_id == "siteSettings"][0]{    homePage->{      ...,      content[]{        ...,        _type == "faqs" => {          ...,          faqs[]->        }      }          }  }
+export type HOME_PAGE_QUERY_RESULT =
+  | {
+      homePage: null;
+    }
+  | {
+      homePage: {
+        _id: string;
+        _type: "page";
+        _createdAt: string;
+        _updatedAt: string;
+        _rev: string;
+        title?: string;
+        slug?: Slug;
+        content: Array<
+          | {
+              _key: string;
+              _type: "faqs";
+              title?: string;
+              faqs: Array<{
+                _id: string;
+                _type: "faq";
+                _createdAt: string;
+                _updatedAt: string;
+                _rev: string;
+                title?: string;
+                body?: BlockContent;
+              }> | null;
+            }
+          | {
+              _key: string;
+              _type: "features";
+              title?: string;
+              features?: Array<{
+                title?: string;
+                text?: string;
+                _type: "feature";
+                _key: string;
+              }>;
+            }
+          | {
+              _key: string;
+              _type: "hero";
+              title?: string;
+              text?: BlockContent;
+              image?: {
+                asset?: SanityImageAssetReference;
+                media?: unknown;
+                hotspot?: SanityImageHotspot;
+                crop?: SanityImageCrop;
+                _type: "image";
+              };
+            }
+          | {
+              _key: string;
+              _type: "splitImage";
+              orientation?: "imageLeft" | "imageRight";
+              title?: string;
+              image?: {
+                asset?: SanityImageAssetReference;
+                media?: unknown;
+                hotspot?: SanityImageHotspot;
+                crop?: SanityImageCrop;
+                _type: "image";
+              };
+            }
+        > | null;
+        mainImage?: {
+          asset?: SanityImageAssetReference;
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+        };
+      } | null;
+    }
+  | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -560,5 +658,6 @@ declare module "@sanity/client" {
     '*[_type == "post" && defined(slug.current)]{ \n  "slug": slug.current\n}': POSTS_SLUGS_QUERY_RESULT;
     '*[_type == "post" && slug.current == $slug][0]{\n  _id,\n  title,\n  body,\n  mainImage,\n  publishedAt,\n  "categories": coalesce(\n    categories[]->{\n      _id,\n      slug,\n      title\n    },\n    []\n  ),\n  author->{\n    name,\n    image},\n  relatedPosts[]{\n    _key, // required for drag and drop\n    ...@->{_id, title, slug} // get fields from the referenced post\n  }\n}': POST_QUERY_RESULT;
     '*[_type == "page" && slug.current == $slug][0]{\n  ...,\n  content[]{\n    ...,\n    _type == "faqs" => {\n      ...,\n      faqs[]->\n    }\n  }\n}': PAGE_QUERY_RESULT;
+    '*[_id == "siteSettings"][0]{\n    homePage->{\n      ...,\n      content[]{\n        ...,\n        _type == "faqs" => {\n          ...,\n          faqs[]->\n        }\n      }      \n    }\n  }': HOME_PAGE_QUERY_RESULT;
   }
 }
