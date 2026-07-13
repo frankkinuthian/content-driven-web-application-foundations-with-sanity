@@ -31,10 +31,11 @@ export async function generateMetadata({
   if (page.seo.image) {
     metadata.openGraph = {
       images: {
-        url: urlFor(page.seo.image).width(1200).height(630).url(),
+        url: page.seo.image
+          ? urlFor(page.seo.image).width(1200).height(630).url()
+          : `/api/og?id=${page._id}`,
         width: 1200,
         height: 630,
-        alt: page.seo.title,
       },
     };
   }
