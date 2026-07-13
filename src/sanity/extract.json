@@ -1052,19 +1052,19 @@
         },
         "optional": true
       },
-      "seo": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "inline",
-          "name": "seo"
-        },
-        "optional": true
-      },
       "social": {
         "type": "objectAttribute",
         "value": {
           "type": "inline",
           "name": "social"
+        },
+        "optional": true
+      },
+      "seo": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "seo"
         },
         "optional": true
       }
@@ -1446,6 +1446,14 @@
               "name": "post.reference"
             }
           }
+        },
+        "optional": true
+      },
+      "social": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "social"
         },
         "optional": true
       },

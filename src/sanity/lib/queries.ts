@@ -70,7 +70,12 @@ export const PAGE_QUERY =
     ...,
     _type == "faqs" => {
       ...,
-      faqs[]->
+      faqs[]->{
+          _id,
+          title,
+          body,
+          "text": pt::text(body)
+        }
     }
   }
 }`);
@@ -90,7 +95,12 @@ export const HOME_PAGE_QUERY = defineQuery(`*[_id == "siteSettings"][0]{
         ...,
         _type == "faqs" => {
           ...,
-          faqs[]->
+          faqs[]->{
+              _id,
+              title,
+              body,
+              "text": pt::text(body)
+            }
         }
       }      
     }
@@ -104,7 +114,6 @@ export const REDIRECTS_QUERY = defineQuery(`
   }
 `);
 
-
 export const OG_IMAGE_QUERY = defineQuery(`
   *[_id == $id][0]{
     title,
@@ -115,4 +124,15 @@ export const OG_IMAGE_QUERY = defineQuery(`
       }
     }
   }    
+`);
+
+export const SITEMAP_QUERY = defineQuery(`
+*[_type in ["page", "post"] && defined(slug.current)] {
+    "href": select(
+      _type == "page" => "/" + slug.current,
+      _type == "post" => "/posts/" + slug.current,
+      slug.current
+    ),
+    _updatedAt
+}
 `);

@@ -195,8 +195,8 @@ export type Page = {
     crop?: SanityImageCrop;
     _type: "image";
   };
-  seo?: Seo;
   social?: Social;
+  seo?: Seo;
 };
 
 export type SanityImageCrop = {
@@ -271,6 +271,7 @@ export type Post = {
       _key: string;
     } & PostReference
   >;
+  social?: Social;
   seo?: Seo;
 };
 
@@ -699,7 +700,7 @@ export type POST_QUERY_RESULT = {
 
 // Source: src/sanity/lib/queries.ts
 // Variable: PAGE_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0]{  ...,  "seo": {    "title": coalesce(seo.title, title, ""),    "description": coalesce(seo.description, ""),    "image": seo.image,    "noIndex": seo.noIndex == true  },  content[]{    ...,    _type == "faqs" => {      ...,      faqs[]->    }  }}
+// Query: *[_type == "page" && slug.current == $slug][0]{  ...,  "seo": {    "title": coalesce(seo.title, title, ""),    "description": coalesce(seo.description, ""),    "image": seo.image,    "noIndex": seo.noIndex == true  },  content[]{    ...,    _type == "faqs" => {      ...,      faqs[]->{          _id,          title,          body,          "text": pt::text(body)        }    }  }}
 export type PAGE_QUERY_RESULT = {
   _id: string;
   _type: "page";
@@ -715,12 +716,9 @@ export type PAGE_QUERY_RESULT = {
         title?: string;
         faqs: Array<{
           _id: string;
-          _type: "faq";
-          _createdAt: string;
-          _updatedAt: string;
-          _rev: string;
-          title?: string;
-          body?: BlockContent;
+          title: string | null;
+          body: BlockContent | null;
+          text: string;
         }> | null;
       }
     | {
@@ -768,6 +766,7 @@ export type PAGE_QUERY_RESULT = {
     crop?: SanityImageCrop;
     _type: "image";
   };
+  social?: Social;
   seo: {
     title: string | "";
     description: string | "";
@@ -780,12 +779,11 @@ export type PAGE_QUERY_RESULT = {
     } | null;
     noIndex: boolean | false;
   };
-  social?: Social;
 } | null;
 
 // Source: src/sanity/lib/queries.ts
 // Variable: HOME_PAGE_QUERY
-// Query: *[_id == "siteSettings"][0]{    homePage->{      ...,      "seo": {        "title": coalesce(seo.title, title, ""),        "description": coalesce(seo.description, ""),        "image": seo.image,        "noIndex": seo.noIndex == true      },      content[]{        ...,        _type == "faqs" => {          ...,          faqs[]->        }      }          }  }
+// Query: *[_id == "siteSettings"][0]{    homePage->{      ...,      "seo": {        "title": coalesce(seo.title, title, ""),        "description": coalesce(seo.description, ""),        "image": seo.image,        "noIndex": seo.noIndex == true      },      content[]{        ...,        _type == "faqs" => {          ...,          faqs[]->{              _id,              title,              body,              "text": pt::text(body)            }        }      }          }  }
 export type HOME_PAGE_QUERY_RESULT =
   | {
       homePage: null;
@@ -806,12 +804,9 @@ export type HOME_PAGE_QUERY_RESULT =
               title?: string;
               faqs: Array<{
                 _id: string;
-                _type: "faq";
-                _createdAt: string;
-                _updatedAt: string;
-                _rev: string;
-                title?: string;
-                body?: BlockContent;
+                title: string | null;
+                body: BlockContent | null;
+                text: string;
               }> | null;
             }
           | {
@@ -859,6 +854,7 @@ export type HOME_PAGE_QUERY_RESULT =
           crop?: SanityImageCrop;
           _type: "image";
         };
+        social?: Social;
         seo: {
           title: string | "";
           description: string | "";
@@ -871,7 +867,6 @@ export type HOME_PAGE_QUERY_RESULT =
           } | null;
           noIndex: boolean | false;
         };
-        social?: Social;
       } | null;
     }
   | null;
@@ -908,6 +903,14 @@ export type OG_IMAGE_QUERY_RESULT =
     }
   | null;
 
+// Source: src/sanity/lib/queries.ts
+// Variable: SITEMAP_QUERY
+// Query: *[_type in ["page", "post"] && defined(slug.current)] {    "href": select(      _type == "page" => "/" + slug.current,      _type == "post" => "/posts/" + slug.current,      slug.current    ),    _updatedAt}
+export type SITEMAP_QUERY_RESULT = Array<{
+  href: string | null;
+  _updatedAt: string;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -915,9 +918,10 @@ declare module "@sanity/client" {
     '*[_type == "post" && defined(slug.current)]|order(publishedAt desc)[0...12]{\n  _id,\n  title,\n  slug,\n  body,\n  mainImage,\n  publishedAt,\n  "categories": coalesce(\n    categories[]->{\n      _id,\n      slug,\n      title\n    },\n    []\n  ),\n  author->{\n    name,\n    image\n  }\n}': POSTS_QUERY_RESULT;
     '*[_type == "post" && defined(slug.current)]{ \n  "slug": slug.current\n}': POSTS_SLUGS_QUERY_RESULT;
     '*[_type == "post" && slug.current == $slug][0]{\n  _id,\n  title,\n  body,\n  mainImage,\n  publishedAt,\n  "seo": {\n    "title": coalesce(seo.title, title, ""),\n    "description": coalesce(seo.description, ""),\n    "image": seo.image,\n    "noIndex": seo.noIndex == true\n  },\n  "categories": coalesce(\n    categories[]->{\n      _id,\n      slug,\n      title\n    },\n    []\n  ),\n  author->{\n    name,\n    image},\n  relatedPosts[]{\n    _key, // required for drag and drop\n    ...@->{_id, title, slug} // get fields from the referenced post\n  }\n}': POST_QUERY_RESULT;
-    '*[_type == "page" && slug.current == $slug][0]{\n  ...,\n  "seo": {\n    "title": coalesce(seo.title, title, ""),\n    "description": coalesce(seo.description, ""),\n    "image": seo.image,\n    "noIndex": seo.noIndex == true\n  },\n  content[]{\n    ...,\n    _type == "faqs" => {\n      ...,\n      faqs[]->\n    }\n  }\n}': PAGE_QUERY_RESULT;
-    '*[_id == "siteSettings"][0]{\n    homePage->{\n      ...,\n      "seo": {\n        "title": coalesce(seo.title, title, ""),\n        "description": coalesce(seo.description, ""),\n        "image": seo.image,\n        "noIndex": seo.noIndex == true\n      },\n      content[]{\n        ...,\n        _type == "faqs" => {\n          ...,\n          faqs[]->\n        }\n      }      \n    }\n  }': HOME_PAGE_QUERY_RESULT;
+    '*[_type == "page" && slug.current == $slug][0]{\n  ...,\n  "seo": {\n    "title": coalesce(seo.title, title, ""),\n    "description": coalesce(seo.description, ""),\n    "image": seo.image,\n    "noIndex": seo.noIndex == true\n  },\n  content[]{\n    ...,\n    _type == "faqs" => {\n      ...,\n      faqs[]->{\n          _id,\n          title,\n          body,\n          "text": pt::text(body)\n        }\n    }\n  }\n}': PAGE_QUERY_RESULT;
+    '*[_id == "siteSettings"][0]{\n    homePage->{\n      ...,\n      "seo": {\n        "title": coalesce(seo.title, title, ""),\n        "description": coalesce(seo.description, ""),\n        "image": seo.image,\n        "noIndex": seo.noIndex == true\n      },\n      content[]{\n        ...,\n        _type == "faqs" => {\n          ...,\n          faqs[]->{\n              _id,\n              title,\n              body,\n              "text": pt::text(body)\n            }\n        }\n      }      \n    }\n  }': HOME_PAGE_QUERY_RESULT;
     '\n  *[_type == "redirect" && isEnabled == true] {\n      source,\n      destination,\n      permanent\n  }\n': REDIRECTS_QUERY_RESULT;
     '\n  *[_id == $id][0]{\n    title,\n    "image": mainImage.asset->{\n      url,\n      metadata {\n        palette\n      }\n    }\n  }    \n': OG_IMAGE_QUERY_RESULT;
+    '\n*[_type in ["page", "post"] && defined(slug.current)] {\n    "href": select(\n      _type == "page" => "/" + slug.current,\n      _type == "post" => "/posts/" + slug.current,\n      slug.current\n    ),\n    _updatedAt\n}\n': SITEMAP_QUERY_RESULT;
   }
 }
