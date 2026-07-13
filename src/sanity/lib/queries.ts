@@ -1,4 +1,4 @@
-import { defineQuery } from 'next-sanity'
+import { defineQuery } from "next-sanity";
 
 export const POSTS_QUERY =
   defineQuery(`*[_type == "post" && defined(slug.current)]|order(publishedAt desc)[0...12]{
@@ -20,12 +20,12 @@ export const POSTS_QUERY =
     name,
     image
   }
-}`)
+}`);
 
 export const POSTS_SLUGS_QUERY =
   defineQuery(`*[_type == "post" && defined(slug.current)]{ 
   "slug": slug.current
-}`)
+}`);
 
 export const POST_QUERY =
   defineQuery(`*[_type == "post" && slug.current == $slug][0]{
@@ -44,6 +44,9 @@ export const POST_QUERY =
   ),
   author->{
     name,
-    image
+    image},
+  relatedPosts[]{
+    _key, // required for drag and drop
+    ...@->{_id, title, slug} // get fields from the referenced post
   }
-}`)
+}`);
