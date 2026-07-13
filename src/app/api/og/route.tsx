@@ -38,9 +38,9 @@ export async function GET(request: Request) {
   }
 
   const vibrantBackground =
-    data?.image?.asset?.metadata?.palette?.vibrant?.background ?? "#3B82F6";
+    data?.image?.metadata?.palette?.vibrant?.background ?? "#3B82F6";
   const darkVibrantBackground =
-    data?.image?.asset?.metadata?.palette?.darkVibrant?.background ?? "#3B82F6";
+    data?.image?.metadata?.palette?.darkVibrant?.background ?? "#3B82F6";
 
   const text = data.title || "";
 
