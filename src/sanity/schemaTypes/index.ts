@@ -14,6 +14,7 @@ import { splitImageType } from "./blocks/splitImageType";
 import { siteSettingsType } from "./siteSettingsType";
 import { redirectType } from "./redirectType";
 import { seoType } from "./seoType";
+import { socialType } from "./socialType";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -31,5 +32,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     redirectType,
     siteSettingsType,
     splitImageType,
+    socialType
   ],
 };

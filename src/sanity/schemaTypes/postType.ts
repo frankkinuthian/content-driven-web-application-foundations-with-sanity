@@ -65,6 +65,10 @@ export const postType = defineType({
       of: [{ type: "reference", to: { type: "post" } }],
     }),
     defineField({
+      name: "social",
+      type: "social",
+    }),
+    defineField({
       name: "seo",
       type: "seo",
     }),

@@ -15,6 +15,12 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: src/sanity/extract.json
+export type Social = {
+  _type: "social";
+  linkedIn?: string;
+  x?: string;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: "reference";
@@ -57,8 +63,8 @@ export type Redirect = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  source?: string;
-  destination?: string;
+  source: string;
+  destination: string;
   permanent?: boolean;
   isEnabled?: boolean;
 };
@@ -190,6 +196,7 @@ export type Page = {
     _type: "image";
   };
   seo?: Seo;
+  social?: Social;
 };
 
 export type SanityImageCrop = {
@@ -313,6 +320,143 @@ export type Category = {
   description?: string;
 };
 
+export type SanityAssistInstructionTask = {
+  _type: "sanity.assist.instructionTask";
+  path?: string;
+  instructionKey?: string;
+  started?: string;
+  updated?: string;
+  info?: string;
+};
+
+export type SanityAssistTaskStatus = {
+  _type: "sanity.assist.task.status";
+  tasks?: Array<
+    {
+      _key: string;
+    } & SanityAssistInstructionTask
+  >;
+};
+
+export type SanityAssistSchemaTypeAnnotations = {
+  _type: "sanity.assist.schemaType.annotations";
+  title?: string;
+  fields?: Array<
+    {
+      _key: string;
+    } & SanityAssistSchemaTypeField
+  >;
+};
+
+export type SanityAssistOutputType = {
+  _type: "sanity.assist.output.type";
+  type?: string;
+};
+
+export type SanityAssistOutputField = {
+  _type: "sanity.assist.output.field";
+  path?: string;
+};
+
+export type AssistInstructionContextReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "assist.instruction.context";
+};
+
+export type SanityAssistInstructionContext = {
+  _type: "sanity.assist.instruction.context";
+  reference: AssistInstructionContextReference;
+};
+
+export type AssistInstructionContext = {
+  _id: string;
+  _type: "assist.instruction.context";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  context?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal";
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+};
+
+export type SanityAssistInstructionUserInput = {
+  _type: "sanity.assist.instruction.userInput";
+  message: string;
+  description?: string;
+};
+
+export type SanityAssistInstructionPrompt = Array<{
+  children?: Array<
+    | {
+        marks?: Array<string>;
+        text?: string;
+        _type: "span";
+        _key: string;
+      }
+    | ({
+        _key: string;
+      } & SanityAssistInstructionFieldRef)
+    | ({
+        _key: string;
+      } & SanityAssistInstructionContext)
+    | ({
+        _key: string;
+      } & SanityAssistInstructionUserInput)
+  >;
+  style?: "normal";
+  listItem?: never;
+  markDefs?: null;
+  level?: number;
+  _type: "block";
+  _key: string;
+}>;
+
+export type SanityAssistInstructionFieldRef = {
+  _type: "sanity.assist.instruction.fieldRef";
+  path?: string;
+};
+
+export type SanityAssistInstruction = {
+  _type: "sanity.assist.instruction";
+  prompt?: SanityAssistInstructionPrompt;
+  icon?: string;
+  title?: string;
+  userId?: string;
+  createdById?: string;
+  output?: Array<
+    | ({
+        _key: string;
+      } & SanityAssistOutputField)
+    | ({
+        _key: string;
+      } & SanityAssistOutputType)
+  >;
+};
+
+export type SanityAssistSchemaTypeField = {
+  _type: "sanity.assist.schemaType.field";
+  path?: string;
+  instructions?: Array<
+    {
+      _key: string;
+    } & SanityAssistInstruction
+  >;
+};
+
 export type SanityImagePaletteSwatch = {
   _type: "sanity.imagePaletteSwatch";
   background?: string;
@@ -411,6 +555,7 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | Social
   | SanityImageAssetReference
   | SplitImage
   | PageReference
@@ -434,6 +579,19 @@ export type AllSanitySchemaTypes =
   | Post
   | Author
   | Category
+  | SanityAssistInstructionTask
+  | SanityAssistTaskStatus
+  | SanityAssistSchemaTypeAnnotations
+  | SanityAssistOutputType
+  | SanityAssistOutputField
+  | AssistInstructionContextReference
+  | SanityAssistInstructionContext
+  | AssistInstructionContext
+  | SanityAssistInstructionUserInput
+  | SanityAssistInstructionPrompt
+  | SanityAssistInstructionFieldRef
+  | SanityAssistInstruction
+  | SanityAssistSchemaTypeField
   | SanityImagePaletteSwatch
   | SanityImagePalette
   | SanityImageDimensions
@@ -622,6 +780,7 @@ export type PAGE_QUERY_RESULT = {
     } | null;
     noIndex: boolean | false;
   };
+  social?: Social;
 } | null;
 
 // Source: src/sanity/lib/queries.ts
@@ -712,6 +871,7 @@ export type HOME_PAGE_QUERY_RESULT =
           } | null;
           noIndex: boolean | false;
         };
+        social?: Social;
       } | null;
     }
   | null;
@@ -720,10 +880,33 @@ export type HOME_PAGE_QUERY_RESULT =
 // Variable: REDIRECTS_QUERY
 // Query: *[_type == "redirect" && isEnabled == true] {      source,      destination,      permanent  }
 export type REDIRECTS_QUERY_RESULT = Array<{
-  source: string | null;
-  destination: string | null;
+  source: string;
+  destination: string;
   permanent: boolean | null;
 }>;
+
+// Source: src/sanity/lib/queries.ts
+// Variable: OG_IMAGE_QUERY
+// Query: *[_id == $id][0]{    title,    "image": mainImage.asset->{      url,      metadata {        palette      }    }  }
+export type OG_IMAGE_QUERY_RESULT =
+  | {
+      title: null;
+      image: null;
+    }
+  | {
+      title: string | null;
+      image: null;
+    }
+  | {
+      title: string | null;
+      image: {
+        url: string;
+        metadata: {
+          palette: SanityImagePalette | null;
+        } | null;
+      } | null;
+    }
+  | null;
 
 // Query TypeMap
 import "@sanity/client";
@@ -735,5 +918,6 @@ declare module "@sanity/client" {
     '*[_type == "page" && slug.current == $slug][0]{\n  ...,\n  "seo": {\n    "title": coalesce(seo.title, title, ""),\n    "description": coalesce(seo.description, ""),\n    "image": seo.image,\n    "noIndex": seo.noIndex == true\n  },\n  content[]{\n    ...,\n    _type == "faqs" => {\n      ...,\n      faqs[]->\n    }\n  }\n}': PAGE_QUERY_RESULT;
     '*[_id == "siteSettings"][0]{\n    homePage->{\n      ...,\n      "seo": {\n        "title": coalesce(seo.title, title, ""),\n        "description": coalesce(seo.description, ""),\n        "image": seo.image,\n        "noIndex": seo.noIndex == true\n      },\n      content[]{\n        ...,\n        _type == "faqs" => {\n          ...,\n          faqs[]->\n        }\n      }      \n    }\n  }': HOME_PAGE_QUERY_RESULT;
     '\n  *[_type == "redirect" && isEnabled == true] {\n      source,\n      destination,\n      permanent\n  }\n': REDIRECTS_QUERY_RESULT;
+    '\n  *[_id == $id][0]{\n    title,\n    "image": mainImage.asset->{\n      url,\n      metadata {\n        palette\n      }\n    }\n  }    \n': OG_IMAGE_QUERY_RESULT;
   }
 }

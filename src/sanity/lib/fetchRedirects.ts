@@ -1,5 +1,5 @@
-import { client } from "@/sanity/lib/client";
-import { REDIRECTS_QUERY } from "@/sanity/lib/queries";
+import { client } from "./client";
+import { REDIRECTS_QUERY } from "./queries";
 
 export async function fetchRedirects() {
   const redirects = await client
